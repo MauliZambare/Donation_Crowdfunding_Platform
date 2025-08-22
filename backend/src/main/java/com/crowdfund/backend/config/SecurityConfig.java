@@ -1,4 +1,5 @@
 package com.crowdfund.backend.config;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -12,12 +13,18 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf().disable()
-            .authorizeHttpRequests()
-            .requestMatchers("/api/users/register", "/api/users/login").permitAll()
-            .anyRequest().authenticated()
-            .and()
-            .httpBasic();
+            .csrf(csrf -> csrf.disable()) // Disable CSRF for APIs
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(
+                    "/api/users/register",
+                    "/api/users/login",
+                    "/api/campaigns/**",
+                    "/api/donations/**",
+    "/api/campaigns/*/donations/**"   // 👈 allow ALL campaign APIs
+                ).permitAll()
+                .anyRequest().authenticated()
+            )
+            .httpBasic(); // simple testing with basic auth if needed
         return http.build();
     }
 }
