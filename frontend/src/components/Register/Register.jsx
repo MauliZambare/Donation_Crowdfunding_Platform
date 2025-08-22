@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { toast } from 'react-toastify';
 import axios from 'axios';
+import './Register.css';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -83,13 +84,8 @@ const Register = () => {
     <div className="container mt-5">
       <div className="row justify-content-center">
         <div className="col-md-8 col-lg-6">
-          <div style={{
-            border: 'none',
-            borderRadius: '12px',
-            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
-            backgroundColor: 'white'
-          }}>
-            <div className="card-body p-5">
+          <div >
+            <div className="register-form-container">
               <h2 className="card-title text-center mb-4">Create an Account</h2>
               <form onSubmit={handleSubmit}>
                 <div className="mb-3">
@@ -102,11 +98,7 @@ const Register = () => {
                     value={formData.name}
                     onChange={handleChange}
                     required
-                    style={{
-                      padding: '12px',
-                      borderRadius: '6px',
-                      border: '1px solid #ddd'
-                    }}
+                    
                   />
                 </div>
                 <div className="mb-3">
@@ -119,11 +111,7 @@ const Register = () => {
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    style={{
-                      padding: '12px',
-                      borderRadius: '6px',
-                      border: '1px solid #ddd'
-                    }}
+                  
                   />
                 </div>
                 <div className="mb-3">
@@ -136,11 +124,7 @@ const Register = () => {
                     value={formData.password}
                     onChange={handleChange}
                     required
-                    style={{
-                      padding: '12px',
-                      borderRadius: '6px',
-                      border: '1px solid #ddd'
-                    }}
+                    
                   />
                 </div>
                 <div className="mb-3">
@@ -153,11 +137,7 @@ const Register = () => {
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     required
-                    style={{
-                      padding: '12px',
-                      borderRadius: '6px',
-                      border: '1px solid #ddd'
-                    }}
+                   
                   />
                 </div>
                 <div className="mb-3">
@@ -168,11 +148,7 @@ const Register = () => {
                     name="userType"
                     value={formData.userType}
                     onChange={handleChange}
-                    style={{
-                      padding: '12px',
-                      borderRadius: '6px',
-                      border: '1px solid #ddd'
-                    }}
+                    
                   >
                     <option value="donor">Donor</option>
                     <option value="ngo">NGO</option>
@@ -191,11 +167,7 @@ const Register = () => {
                         value={formData.bankAccount}
                         onChange={handleChange}
                         required
-                        style={{
-                          padding: '12px',
-                          borderRadius: '6px',
-                          border: '1px solid #ddd'
-                        }}
+                        
                       />
                     </div>
                     <div className="mb-3">
@@ -208,11 +180,7 @@ const Register = () => {
                         value={formData.bankIFSC}
                         onChange={handleChange}
                         required
-                        style={{
-                          padding: '12px',
-                          borderRadius: '6px',
-                          border: '1px solid #ddd'
-                        }}
+                       
                       />
                     </div>
                   </>
@@ -222,14 +190,7 @@ const Register = () => {
                   type="submit" 
                   className="btn w-100"
                   disabled={isLoading}
-                  style={{
-                    backgroundColor: '#4361ee',
-                    borderColor: '#4361ee',
-                    padding: '10px',
-                    borderRadius: '6px',
-                    fontWeight: '600',
-                    color: 'white'
-                  }}
+                  
                 >
                   {isLoading ? (
                     <>
