@@ -1,10 +1,11 @@
 // src/components/Login.jsx
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import Swal from 'sweetalert2';
-import { toast } from 'react-toastify';
 import axios from 'axios';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import Swal from 'sweetalert2';
 import './Login.css';
+
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -17,6 +18,15 @@ const Login = () => {
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+
+  useEffect(() => {
+  const token = localStorage.getItem('token');
+  const user = JSON.parse(localStorage.getItem('user'));
+  if (token && user) {
+    navigate(user.userType === 'ngo' ? '/ngo-dashboard' : '/Dashboard/Home');
+  }
+}, []);
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -44,7 +54,7 @@ const Login = () => {
         if (user.userType === 'ngo') {
           navigate('/ngo-dashboard');
         } else {
-          navigate('/donor-dashboard');
+          navigate('/Dashboard/Home');
         }
       }
     } catch (error) {

@@ -1,4 +1,5 @@
 import { Link, Route, Routes } from "react-router-dom";
+import Home from "./components/Dashboard/Home";
 import Login from "./components/Login/Login";
 import Register from "./components/Register/Register";
 
@@ -24,6 +25,7 @@ const App = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/" element={<Login />} />
+        <Route path="/Dashboard/home" element={<Home />} />
       </Routes>
     </>
   );
