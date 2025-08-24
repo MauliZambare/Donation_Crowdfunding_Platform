@@ -1,4 +1,3 @@
-// src/components/Login.jsx
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -6,12 +5,8 @@ import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
 import './Login.css';
 
-
-const Login = () => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  });
+const Login = ({ setUser }) => {  // ✅ receive setUser from App.jsx
+  const [formData, setFormData] = useState({ email: '', password: '' });
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -20,47 +15,40 @@ const Login = () => {
   };
 
   useEffect(() => {
-  const token = localStorage.getItem('token');
-  const user = JSON.parse(localStorage.getItem('user'));
-  if (token && user) {
-    navigate(user.userType === 'ngo' ? '/ngo-dashboard' : '/Dashboard/Home');
-  }
-}, []);
-
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (token && user) {
+      const path = user.userType?.toLowerCase() === 'ngo' ? '/Dashboard/Ngo' : '/Dashboard/Home';
+      if (typeof setUser === "function") setUser(user); // ✅ update App state
+      navigate(path, { replace: true });
+    }
+  }, [navigate, setUser]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      const response = await axios.post(
-        'http://localhost:8080/api/users/login',
-        formData
-      );
-
-      console.log('Backend response:', response.data); // For debugging
+      const response = await axios.post('http://localhost:8080/api/users/login', formData);
 
       if (response.status === 200) {
-        // Adjust according to your backend response structure
-        const user = response.data.user || response.data; 
+        const user = response.data.user || response.data;
         const token = response.data.token;
 
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(user));
 
+        if (typeof setUser === "function") setUser(user); // ✅ update App state
+
         toast.success('Login successful!');
 
-        // Redirect based on userType if available
-        if (user.userType === 'ngo') {
-          navigate('/ngo-dashboard');
-        } else {
-          navigate('/Dashboard/Home');
-        }
+        const path = user.userType?.toLowerCase() === 'ngo' ? '/Dashboard/Ngo' : '/Dashboard/Home';
+        navigate(path, { replace: true });
       }
     } catch (error) {
       console.error('Login error:', error);
 
-      if (error.response && error.response.status === 401) {
+      if (error.response?.status === 401) {
         Swal.fire({
           icon: 'error',
           title: 'Login Failed',
@@ -109,11 +97,7 @@ const Login = () => {
                   required
                 />
               </div>
-              <button 
-                type="submit" 
-                className="btn btn-primary w-100"
-                disabled={isLoading}
-              >
+              <button type="submit" className="btn btn-primary w-100" disabled={isLoading}>
                 {isLoading ? (
                   <>
                     <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
