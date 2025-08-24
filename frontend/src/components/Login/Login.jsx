@@ -5,7 +5,7 @@ import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
 import './Login.css';
 
-const Login = ({ setUser }) => {  // ✅ receive setUser from App.jsx
+const Login = ({ setUser }) => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -19,7 +19,7 @@ const Login = ({ setUser }) => {  // ✅ receive setUser from App.jsx
     const user = JSON.parse(localStorage.getItem('user'));
     if (token && user) {
       const path = user.userType?.toLowerCase() === 'ngo' ? '/Dashboard/Ngo' : '/Dashboard/Home';
-      if (typeof setUser === "function") setUser(user); // ✅ update App state
+      if (typeof setUser === "function") setUser(user);
       navigate(path, { replace: true });
     }
   }, [navigate, setUser]);
@@ -38,7 +38,7 @@ const Login = ({ setUser }) => {  // ✅ receive setUser from App.jsx
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(user));
 
-        if (typeof setUser === "function") setUser(user); // ✅ update App state
+        if (typeof setUser === "function") setUser(user);
 
         toast.success('Login successful!');
 
@@ -67,48 +67,66 @@ const Login = ({ setUser }) => {  // ✅ receive setUser from App.jsx
   };
 
   return (
-    <div className="container mt-5">
-      <div className="row justify-content-center">
-        <div className="col-md-6 col-lg-4">
-          <div className="auth-form-container p-4 shadow rounded">
-            <h2 className="text-center mb-4">Login to Your Account</h2>
-            <form onSubmit={handleSubmit}>
-              <div className="mb-3">
-                <label htmlFor="email" className="form-label">Email</label>
+    <div className="login-container">
+      <div className="login-background">
+        <div className="shape shape-1"></div>
+        <div className="shape shape-2"></div>
+        <div className="shape shape-3"></div>
+      </div>
+      
+      <div className="login-content">
+        <div className="login-form-wrapper">
+          <div className="login-header">
+            <h2>Welcome Back</h2>
+            <p>Sign in to continue your journey</p>
+          </div>
+          
+          <form onSubmit={handleSubmit} className="login-form">
+            <div className="form-group">
+              <div className="input-with-icon">
+                <i className="icon-mail"></i>
                 <input
                   type="email"
-                  className="form-control"
-                  id="email"
+                  placeholder="Enter your email"
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
                   required
                 />
               </div>
-              <div className="mb-3">
-                <label htmlFor="password" className="form-label">Password</label>
+            </div>
+            
+            <div className="form-group">
+              <div className="input-with-icon">
+                <i className="icon-lock"></i>
                 <input
                   type="password"
-                  className="form-control"
-                  id="password"
+                  placeholder="Enter your password"
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
                   required
                 />
               </div>
-              <button type="submit" className="btn btn-primary w-100" disabled={isLoading}>
-                {isLoading ? (
-                  <>
-                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                    Logging in...
-                  </>
-                ) : 'Login'}
-              </button>
-            </form>
-            <p className="text-center mt-3">
-              Don't have an account? <Link to="/register">Register here</Link>
-            </p>
+            </div>
+            
+            <button type="submit" className="login-btn" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <span className="spinner"></span>
+                  Signing in...
+                </>
+              ) : (
+                <>
+                  <i className="icon-arrow"></i>
+                  Sign In
+                </>
+              )}
+            </button>
+          </form>
+          
+          <div className="login-footer">
+            <p>Don't have an account? <Link to="/register">Create Account</Link></p>
           </div>
         </div>
       </div>

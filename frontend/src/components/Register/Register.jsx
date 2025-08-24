@@ -25,7 +25,6 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Password validation
     if (formData.password !== formData.confirmPassword) {
       Swal.fire({ icon: 'error', title: 'Validation Error', text: 'Passwords do not match' });
       return;
@@ -34,19 +33,15 @@ const Register = () => {
     setIsLoading(true);
 
     try {
-      // Remove confirmPassword before sending to backend
       const apiData = { ...formData };
       delete apiData.confirmPassword;
 
       const response = await axios.post('http://localhost:8080/api/users/register', apiData);
-
-      // Assuming backend returns only the created user object
       const user = response.data;
 
       localStorage.setItem('user', JSON.stringify(user));
       toast.success('Registration successful!');
 
-      // Redirect based on userType
       if (user.userType === 'ngo') {
         navigate('/Dashboard/ngo');
       } else {
@@ -74,61 +69,107 @@ const Register = () => {
   };
 
   return (
-    <div className="container mt-5">
-      <div className="row justify-content-center">
-        <div className="col-md-8 col-lg-6">
-          <div className="register-form-container card p-4 shadow">
-            <h2 className="card-title text-center mb-4">Create an Account</h2>
-            <form onSubmit={handleSubmit}>
-              <div className="mb-3">
+    <div className="register-container">
+      <div className="register-background">
+        <div className="register-shape register-shape-1"></div>
+        <div className="register-shape register-shape-2"></div>
+        <div className="register-shape register-shape-3"></div>
+      </div>
+      
+      <div className="register-content">
+        <div className="register-card">
+          <div className="register-header">
+            <h2>Join Our Community</h2>
+            <p>Create your account and make a difference</p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="register-form">
+            <div className="form-row">
+              <div className="form-group">
                 <label htmlFor="name" className="form-label">Full Name</label>
-                <input type="text" className="form-control" id="name" name="name" value={formData.name} onChange={handleChange} required />
+                <input type="text" id="name" name="name" value={formData.name} onChange={handleChange} required />
+                <div className="input-icon">
+                  <i className="icon-user"></i>
+                </div>
               </div>
 
-              <div className="mb-3">
+              <div className="form-group">
                 <label htmlFor="email" className="form-label">Email</label>
-                <input type="email" className="form-control" id="email" name="email" value={formData.email} onChange={handleChange} required />
+                <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} required />
+                <div className="input-icon">
+                  <i className="icon-email"></i>
+                </div>
               </div>
+            </div>
 
-              <div className="mb-3">
+            <div className="form-row">
+              <div className="form-group">
                 <label htmlFor="password" className="form-label">Password</label>
-                <input type="password" className="form-control" id="password" name="password" value={formData.password} onChange={handleChange} required />
+                <input type="password" id="password" name="password" value={formData.password} onChange={handleChange} required />
+                <div className="input-icon">
+                  <i className="icon-lock"></i>
+                </div>
               </div>
 
-              <div className="mb-3">
+              <div className="form-group">
                 <label htmlFor="confirmPassword" className="form-label">Confirm Password</label>
-                <input type="password" className="form-control" id="confirmPassword" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} required />
+                <input type="password" id="confirmPassword" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} required />
+                <div className="input-icon">
+                  <i className="icon-lock"></i>
+                </div>
               </div>
+            </div>
 
-              <div className="mb-3">
-                <label htmlFor="userType" className="form-label">I am a</label>
-                <select className="form-select" id="userType" name="userType" value={formData.userType} onChange={handleChange}>
-                  <option value="donor">Donor</option>
-                  <option value="ngo">NGO</option>
-                </select>
+            <div className="form-group">
+              <label htmlFor="userType" className="form-label">I am a</label>
+              <div className="user-type-selector">
+                <button
+                  type="button"
+                  className={`user-type-btn ${formData.userType === 'donor' ? 'active' : ''}`}
+                  onClick={() => setFormData({...formData, userType: 'donor'})}
+                >
+                  Donor
+                </button>
+                <button
+                  type="button"
+                  className={`user-type-btn ${formData.userType === 'ngo' ? 'active' : ''}`}
+                  onClick={() => setFormData({...formData, userType: 'ngo'})}
+                >
+                  NGO
+                </button>
               </div>
+            </div>
 
-              {formData.userType === 'ngo' && (
-                <>
-                  <div className="mb-3">
-                    <label htmlFor="bankAccount" className="form-label">Bank Account Number</label>
-                    <input type="text" className="form-control" id="bankAccount" name="bankAccount" value={formData.bankAccount} onChange={handleChange} required />
+            {formData.userType === 'ngo' && (
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="bankAccount" className="form-label">Bank Account Number</label>
+                  <input type="text" id="bankAccount" name="bankAccount" value={formData.bankAccount} onChange={handleChange} required />
+                  <div className="input-icon">
+                    <i className="icon-bank"></i>
                   </div>
-                  <div className="mb-3">
-                    <label htmlFor="bankIFSC" className="form-label">Bank IFSC Code</label>
-                    <input type="text" className="form-control" id="bankIFSC" name="bankIFSC" value={formData.bankIFSC} onChange={handleChange} required />
-                  </div>
-                </>
-              )}
+                </div>
 
-              <button type="submit" className="btn btn-primary w-100" disabled={isLoading}>
-                {isLoading ? <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> : null}
-                {isLoading ? 'Creating Account...' : 'Register'}
-              </button>
-            </form>
-            <p className="text-center mt-3">
-              Already have an account? <Link to="/login">Login here</Link>
-            </p>
+                <div className="form-group">
+                  <label htmlFor="bankIFSC" className="form-label">Bank IFSC Code</label>
+                  <input type="text" id="bankIFSC" name="bankIFSC" value={formData.bankIFSC} onChange={handleChange} required />
+                  <div className="input-icon">
+                    <i className="icon-code"></i>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <button type="submit" className="register-btn" disabled={isLoading}>
+              {isLoading ? (
+                <div className="spinner"></div>
+              ) : null}
+              {isLoading ? 'Creating Account...' : 'Register Now'}
+            </button>
+          </form>
+
+          <div className="register-footer">
+            <p>Already have an account? <Link to="/login" className="login-link">Sign In</Link></p>
           </div>
         </div>
       </div>
