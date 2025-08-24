@@ -38,3 +38,8 @@
   font-weight: bold;
   color: #007bff;
 }
+
+/* Full preview image in form */
+.card-img-top {
+  border-radius: 5px;
+}
