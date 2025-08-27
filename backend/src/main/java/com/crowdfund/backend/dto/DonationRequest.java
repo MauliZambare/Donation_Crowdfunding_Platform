@@ -15,7 +15,7 @@ public class DonationRequest {
 
     // Getters & Setters
     public Double getAmount() { return amount; }
-    public void setAmount(Double amount) { this.amount = amount; }
+    public void setAmount(@NotNull @Min(1) Double amount) { this.amount = amount; }
 
     public String getDonorName() { return donorName; }
     public void setDonorName(String donorName) { this.donorName = donorName; }

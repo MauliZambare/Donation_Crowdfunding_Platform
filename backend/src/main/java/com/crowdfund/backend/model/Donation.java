@@ -1,9 +1,9 @@
 package com.crowdfund.backend.model;
 
+import java.util.Date;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-
-import java.util.Date;
 
 @Document(collection = "donations")
 public class Donation {
@@ -11,14 +11,14 @@ public class Donation {
     @Id
     private String id;
 
-    private String campaignId;    
-    private String donorId;        // (optional) logged-in user id
-    private String donorName;      // नाव (anonymous असेल तर रिकामं ठेव)
-    private String donorEmail;     // (optional)
-    private boolean anonymous;     // true = नाव लपवा
+    private String campaignId;      // संबंधित कॅम्पेन ID
+    private String userId;          // लॉग-इन user id (पूर्वी donorId होतं → आता बदललं)
+    private String donorName;       // नाव (anonymous असेल तर रिकामं ठेव)
+    private String donorEmail;      // (optional)
+    private boolean anonymous;      // true = नाव लपवा
 
-    private double amount;         // देणगी रक्कम
-    private String message;        // (optional) शुभेच्छा/नोट
+    private double amount;          // देणगी रक्कम
+    private String message;         // (optional) शुभेच्छा/नोट
 
     // Payment meta (Razorpay integration साठी)
     private String paymentProvider;   // e.g. "RAZORPAY"
@@ -38,8 +38,8 @@ public class Donation {
     public String getCampaignId() { return campaignId; }
     public void setCampaignId(String campaignId) { this.campaignId = campaignId; }
 
-    public String getDonorId() { return donorId; }
-    public void setDonorId(String donorId) { this.donorId = donorId; }
+    public String getUserId() { return userId; }
+    public void setUserId(String userId) { this.userId = userId; }
 
     public String getDonorName() { return donorName; }
     public void setDonorName(String donorName) { this.donorName = donorName; }

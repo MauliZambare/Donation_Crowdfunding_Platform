@@ -1,14 +1,22 @@
 package com.crowdfund.backend.controller;
 
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.crowdfund.backend.dto.DonationRequest;
 import com.crowdfund.backend.dto.DonationResponse;
 import com.crowdfund.backend.model.Donation;
 import com.crowdfund.backend.service.DonationManager;
-import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api")
@@ -20,13 +28,15 @@ public class DonationController {
         this.donationManager = donationManager;
     }
 
-    // ✅ Create donation for a campaign
-    @PostMapping("/campaigns/{campaignId}/donations")
+    // ✅ Create donation for a campaign by a user
+    @PostMapping("/campaigns/{campaignId}/users/{userId}/donations")
     public ResponseEntity<DonationResponse> donate(
             @PathVariable String campaignId,
+            @PathVariable String userId,
             @Valid @RequestBody DonationRequest request
     ) {
-        return ResponseEntity.ok(donationManager.donate(campaignId, request));
+        DonationResponse response = donationManager.donate(campaignId, userId, request);
+        return ResponseEntity.ok(response);
     }
 
     // ✅ List donations of a campaign

@@ -12,3 +12,7 @@ export const registerUser = (userData) => {
 export const loginUser = (loginData) => {
   return axios.post(`${API_URL}/login`, loginData);
 };
+
+// Razorpay Key (Public - safe to use in frontend)
+export const RAZORPAY_KEY_ID = "rzp_test_RALd8Iai4u6gPg";
+
