@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import Home from "./components/Dashboard/Home";
 import Ngo from "./components/Dashboard/Ngo";
+import Payment from "./components/Donation/Payment";
 import Login from "./components/Login/Login";
 import Register from "./components/Register/Register";
 
@@ -59,6 +60,7 @@ const App = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login setUser={setUser} />} />
         <Route path="/" element={<Login setUser={setUser} />} />
+        <Route path="/payment" element={<Payment />} />
 
         {/* Donor Dashboard */}
         <Route
