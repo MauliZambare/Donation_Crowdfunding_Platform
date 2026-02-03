@@ -18,8 +18,11 @@ const Login = ({ setUser }) => {
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user'));
     if (token && user) {
-      const path = user.userType?.toLowerCase() === 'ngo' ? '/Dashboard/Ngo' : '/Dashboard/Home';
-      if (typeof setUser === "function") setUser(user);
+      const path =
+        user.userType?.toLowerCase() === 'ngo'
+          ? '/Dashboard/Ngo'
+          : '/Dashboard/Home';
+      if (typeof setUser === 'function') setUser(user);
       navigate(path, { replace: true });
     }
   }, [navigate, setUser]);
@@ -29,7 +32,10 @@ const Login = ({ setUser }) => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:8080/api/users/login', formData);
+      const response = await axios.post(
+        'http://localhost:8080/api/users/login',
+        formData
+      );
 
       if (response.status === 200) {
         const user = response.data.user || response.data;
@@ -38,16 +44,16 @@ const Login = ({ setUser }) => {
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(user));
 
-        if (typeof setUser === "function") setUser(user);
+        if (typeof setUser === 'function') setUser(user);
 
         toast.success('Login successful!');
-
-        const path = user.userType?.toLowerCase() === 'ngo' ? '/Dashboard/Ngo' : '/Dashboard/Home';
+        const path =
+          user.userType?.toLowerCase() === 'ngo'
+            ? '/Dashboard/Ngo'
+            : '/Dashboard/Home';
         navigate(path, { replace: true });
       }
     } catch (error) {
-      console.error('Login error:', error);
-
       if (error.response?.status === 401) {
         Swal.fire({
           icon: 'error',
@@ -58,7 +64,7 @@ const Login = ({ setUser }) => {
         Swal.fire({
           icon: 'error',
           title: 'Error',
-          text: 'An error occurred during login. Please try again.',
+          text: 'Something went wrong. Try again.',
         });
       }
     } finally {
@@ -67,67 +73,51 @@ const Login = ({ setUser }) => {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-background">
-        <div className="shape shape-1"></div>
-        <div className="shape shape-2"></div>
-        <div className="shape shape-3"></div>
+    <div className="auth-wrapper">
+      {/* LEFT PANEL */}
+      <div className="auth-left">
+        <h1>DonateHope</h1>
+        <h3>Donation & Crowdfunding Platform</h3>
+        <p>Empowering causes. Supporting NGOs. Changing lives.</p>
       </div>
-      
-      <div className="login-content">
-        <div className="login-form-wrapper">
-          <div className="login-header">
-            <h2>Welcome Back</h2>
-            <p>Sign in to continue your journey</p>
-          </div>
-          
-          <form onSubmit={handleSubmit} className="login-form">
-            <div className="form-group">
-              <div className="input-with-icon">
-                <i className="icon-mail"></i>
-                <input
-                  type="email"
-                  placeholder="Enter your email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-            </div>
-            
-            <div className="form-group">
-              <div className="input-with-icon">
-                <i className="icon-lock"></i>
-                <input
-                  type="password"
-                  placeholder="Enter your password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-            </div>
-            
-            <button type="submit" className="login-btn" disabled={isLoading}>
-              {isLoading ? (
-                <>
-                  <span className="spinner"></span>
-                  Signing in...
-                </>
-              ) : (
-                <>
-                  <i className="icon-arrow"></i>
-                  Sign In
-                </>
-              )}
-            </button>
-          </form>
-          
-          <div className="login-footer">
-            <p>Don't have an account? <Link to="/register">Create Account</Link></p>
-          </div>
+
+      {/* RIGHT PANEL */}
+      <div className="auth-right">
+        <h2>Sign in</h2>
+        <p className="sub-text">Enter your details below</p>
+
+        <button className="google-btn">Access your profile</button>
+        <button className="facebook-btn">Verify identity</button>
+
+        <div className="divider">or</div>
+
+        <form onSubmit={handleSubmit}>
+          <input
+            type="email"
+            placeholder="Email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+          />
+
+          <input
+            type="password"
+            placeholder="Password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+          />
+
+          <button type="submit" className="login-main-btn" disabled={isLoading}>
+            {isLoading ? 'Logging in...' : 'Login'}
+          </button>
+        </form>
+
+        <div className="auth-links">
+          <Link to="/forgot-password">Forgot Password</Link>
+          <Link to="/register">Sign Up</Link>
         </div>
       </div>
     </div>
