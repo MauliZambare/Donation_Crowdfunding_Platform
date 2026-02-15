@@ -16,21 +16,21 @@ public class Campaign {
     private double raisedAmount;
     private Date deadline;
     private String creatorId; // user id
-    private String image;
+    private String imageUrl;
     private String status; // active / closed
     private Date createdAt = new Date();
 
     // Constructors
     public Campaign() {}
 
-    public Campaign(String title, String description, double targetAmount, Date deadline, String creatorId, String image) {
+    public Campaign(String title, String description, double targetAmount, Date deadline, String creatorId, String imageUrl) {
         this.title = title;
         this.description = description;
         this.targetAmount = targetAmount;
         this.raisedAmount = 0;
         this.deadline = deadline;
         this.creatorId = creatorId;
-        this.image = image;
+        this.imageUrl = imageUrl;
         this.status = "active";
         this.createdAt = new Date();
     }
@@ -85,11 +85,11 @@ public class Campaign {
         this.creatorId = creatorId;
     }
 
-    public String getImage() {
-        return image;
+    public String getImageUrl() {
+        return imageUrl;
     }
-    public void setImage(String image) {
-        this.image = image;
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public String getStatus() {

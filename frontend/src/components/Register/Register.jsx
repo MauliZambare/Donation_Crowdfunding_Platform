@@ -1,8 +1,8 @@
-import axios from 'axios';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
+import { registerUser } from '../../services/api';
 import './Register.css';
 
 const Register = () => {
@@ -36,7 +36,7 @@ const Register = () => {
       const apiData = { ...formData };
       delete apiData.confirmPassword;
 
-      const response = await axios.post('http://localhost:8080/api/users/register', apiData);
+      const response = await registerUser(apiData);
       const user = response.data;
 
       localStorage.setItem('user', JSON.stringify(user));

@@ -1,8 +1,8 @@
-import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
+import { loginUser } from '../../services/api';
 import './Login.css';
 
 const Login = ({ setUser }) => {
@@ -32,10 +32,7 @@ const Login = ({ setUser }) => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(
-        'http://localhost:8080/api/users/login',
-        formData
-      );
+      const response = await loginUser(formData);
 
       if (response.status === 200) {
         const user = response.data.user || response.data;

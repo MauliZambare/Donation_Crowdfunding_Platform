@@ -1,8 +1,9 @@
-import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Swal from "sweetalert2";
+import { getCampaigns } from "../../services/api";
 import "./Home.css";
+
+const FALLBACK_IMAGE_URL = "https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80";
 
 const Home = () => {
   const [campaigns, setCampaigns] = useState([]);
@@ -22,7 +23,8 @@ const Home = () => {
 
   const fetchCampaigns = async () => {
     try {
-      const res = await axios.get("http://localhost:8080/api/campaigns");
+      const res = await getCampaigns();
+      console.log("Campaign API response:", res.data);
       setCampaigns(res.data);
     } catch (err) {
       console.error("Error fetching campaigns:", err);
@@ -81,6 +83,7 @@ const Home = () => {
       <div className="instagram-feed">
         {campaigns.map((c) => (
           <div key={c.id} className="post-card">
+            {console.log("Campaign item:", c)}
             <div className="post-header">
               <div className="poster-info">
                 <div className="poster-avatar">
@@ -95,19 +98,15 @@ const Home = () => {
             </div>
 
             <div className="post-image">
-              {c.image ? (
-                <img 
-                  src={`http://localhost:8080${c.image}`} 
-                  alt={c.title}
-                  onClick={() => openImageModal(`http://localhost:8080${c.image}`)}
-                />
-              ) : (
-                <img 
-                  src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" 
-                  alt="Default campaign"
-                  onClick={() => openImageModal("https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80")}
-                />
-              )}
+              <img
+                src={resolveCampaignImageUrl(c)}
+                alt={c.title || "Campaign"}
+                onClick={() => openImageModal(resolveCampaignImageUrl(c))}
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = FALLBACK_IMAGE_URL;
+                }}
+              />
             </div>
 
             <div className="post-actions">
@@ -217,3 +216,12 @@ const Home = () => {
 };
 
 export default Home;
+
+function resolveCampaignImageUrl(campaign) {
+  const imageUrl = campaign?.imageUrl || campaign?.image || "";
+  if (!imageUrl) return FALLBACK_IMAGE_URL;
+  if (imageUrl.startsWith("http://")) {
+    return "https://" + imageUrl.substring("http://".length);
+  }
+  return imageUrl;
+}

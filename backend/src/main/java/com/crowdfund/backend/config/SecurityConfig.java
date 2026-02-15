@@ -22,7 +22,7 @@ public class SecurityConfig {
                     "/api/users/register",
                     "/api/users/login",
                     "/api/campaigns/**",
-                    "/uploads/**"
+                    "/api/images/upload"
                 ).permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/payments/**").permitAll() // allow POST explicitly
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // allow preflight requests
