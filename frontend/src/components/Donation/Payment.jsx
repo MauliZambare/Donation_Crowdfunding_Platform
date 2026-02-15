@@ -9,6 +9,9 @@ const Payment = ({ campaignId, campaignTitle, userId, user }) => {
   const [amount, setAmount] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [donorName, setDonorName] = useState("");
+  const [donorEmail, setDonorEmail] = useState("");
+  const [donorPhone, setDonorPhone] = useState("");
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -26,6 +29,18 @@ const Payment = ({ campaignId, campaignTitle, userId, user }) => {
   const effectiveUserId = userId || location.state?.userId || storedUser?.id || "";
 
   const quickAmounts = [100, 500, 1000, 2000, 5000];
+
+  useEffect(() => {
+    if (!donorName && effectiveUser?.name) {
+      setDonorName(effectiveUser.name);
+    }
+    if (!donorEmail && effectiveUser?.email) {
+      setDonorEmail(effectiveUser.email);
+    }
+    if (!donorPhone && effectiveUser?.phone) {
+      setDonorPhone(effectiveUser.phone);
+    }
+  }, [effectiveUser, donorName, donorEmail, donorPhone]);
 
   useEffect(() => {
     if (!document.querySelector("#razorpay-sdk")) {
@@ -51,6 +66,15 @@ const Payment = ({ campaignId, campaignTitle, userId, user }) => {
       if (!Number.isFinite(donationAmount) || donationAmount < 1) {
         throw new Error("Please enter a valid amount.");
       }
+      if (!donorName.trim()) {
+        throw new Error("Please enter donor full name.");
+      }
+      if (!donorEmail.trim()) {
+        throw new Error("Please enter donor email.");
+      }
+      if (!donorPhone.trim()) {
+        throw new Error("Please enter donor phone.");
+      }
 
       const { data } = await api.post("/payments/create-order", {
         campaignId: effectiveCampaignId,
@@ -75,23 +99,56 @@ const Payment = ({ campaignId, campaignTitle, userId, user }) => {
         description: `Donation for ${effectiveCampaignTitle}`,
         order_id: orderId,
         handler: async (response) => {
+          let paymentRecordSaved = false;
+          let paymentRecordErrorMessage = "";
+
           try {
             await api.post("/payments", {
               campaignId: effectiveCampaignId,
-              donorName: effectiveUser?.name || "Anonymous",
-              donorEmail: effectiveUser?.email || "unknown@example.com",
+              donorName: donorName.trim(),
+              donorEmail: donorEmail.trim(),
               amount: donationAmount,
             });
-            setMessage(`Payment successful. Payment ID: ${response.razorpay_payment_id}`);
-            setAmount("");
+            paymentRecordSaved = true;
           } catch (saveError) {
-            const saveMsg = extractErrorMessage(saveError, "Payment succeeded, but saving payment record failed.");
-            setMessage(saveMsg);
+            paymentRecordErrorMessage = extractErrorMessage(saveError, "Payment succeeded, but saving payment record failed.");
+          }
+
+          try {
+            const { data: verificationResponse } = await api.post("/payments/verify", {
+              campaignId: effectiveCampaignId,
+              userId: effectiveUserId,
+              donorName: donorName.trim(),
+              donorEmail: donorEmail.trim(),
+              donorPhone: donorPhone.trim(),
+              amount: donationAmount,
+              razorpayOrderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature,
+            });
+
+            const emailStatus = verificationResponse?.emailSent ? "Email sent." : "Email sending failed.";
+            setMessage(
+              `Payment successful. Payment ID: ${response.razorpay_payment_id}. ${emailStatus} `
+              + `Download: ${verificationResponse?.receiptDownloadUrl || "/api/receipt/download/" + response.razorpay_payment_id}`
+            );
+            setAmount("");
+          } catch (verifyError) {
+            const verifyMsg = extractErrorMessage(verifyError, "Payment succeeded, but receipt generation failed.");
+            if (paymentRecordSaved) {
+              setMessage(`Payment successful. Payment ID: ${response.razorpay_payment_id}. ${verifyMsg}`);
+            } else {
+              setMessage(
+                `Payment successful. Payment ID: ${response.razorpay_payment_id}. `
+                + `${paymentRecordErrorMessage || "Payment record save failed."} ${verifyMsg}`
+              );
+            }
           }
         },
         prefill: {
-          name: effectiveUser?.name || "Guest User",
-          email: effectiveUser?.email || "guest@example.com",
+          name: donorName.trim() || effectiveUser?.name || "Guest User",
+          email: donorEmail.trim() || effectiveUser?.email || "guest@example.com",
+          contact: donorPhone.trim(),
         },
         theme: { color: "#3399cc" },
         modal: {
@@ -129,6 +186,42 @@ const Payment = ({ campaignId, campaignTitle, userId, user }) => {
           )}
 
           <form onSubmit={handlePayment}>
+            <div className="form-group mb-3">
+              <label className="form-label fw-semibold">Full Name</label>
+              <input
+                type="text"
+                className="form-control"
+                value={donorName}
+                onChange={(e) => setDonorName(e.target.value)}
+                required
+                placeholder="Enter full name"
+              />
+            </div>
+
+            <div className="form-group mb-3">
+              <label className="form-label fw-semibold">Email</label>
+              <input
+                type="email"
+                className="form-control"
+                value={donorEmail}
+                onChange={(e) => setDonorEmail(e.target.value)}
+                required
+                placeholder="Enter email"
+              />
+            </div>
+
+            <div className="form-group mb-4">
+              <label className="form-label fw-semibold">Phone</label>
+              <input
+                type="tel"
+                className="form-control"
+                value={donorPhone}
+                onChange={(e) => setDonorPhone(e.target.value)}
+                required
+                placeholder="Enter phone number"
+              />
+            </div>
+
             <div className="form-group mb-4">
               <label className="form-label fw-semibold">Donation Amount (INR)</label>
               <div className="quick-amounts d-flex flex-wrap gap-2 mb-3">
