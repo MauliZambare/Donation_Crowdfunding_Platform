@@ -16,6 +16,7 @@ public class Campaign {
     private double raisedAmount;
     private Date deadline;
     private String creatorId; // user id
+    private String ngoName;
     private String imageUrl;
     private String status; // active / closed
     private Date createdAt = new Date();
@@ -83,6 +84,13 @@ public class Campaign {
     }
     public void setCreatorId(String creatorId) {
         this.creatorId = creatorId;
+    }
+
+    public String getNgoName() {
+        return ngoName;
+    }
+    public void setNgoName(String ngoName) {
+        this.ngoName = ngoName;
     }
 
     public String getImageUrl() {

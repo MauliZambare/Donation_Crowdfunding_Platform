@@ -53,6 +53,7 @@ const Ngo = () => {
         targetAmount: Number(formData.targetAmount),
         deadline: formData.deadline,
         creatorId: loggedInUser.id,
+        ngoName: loggedInUser.name,
         imageUrl: formData.imageUrl,
       };
       console.log("Create campaign payload:", payload);

@@ -30,10 +30,11 @@ public class CampaignController {
 
     @PostMapping
     public Campaign createCampaign(@RequestBody Campaign campaign) {
-        log.info("Create campaign request. title={}, creatorId={}, imageUrl={}",
-            campaign.getTitle(), campaign.getCreatorId(), campaign.getImageUrl());
+        log.info("Create campaign request. title={}, creatorId={}, ngoName={}, imageUrl={}",
+            campaign.getTitle(), campaign.getCreatorId(), campaign.getNgoName(), campaign.getImageUrl());
         Campaign savedCampaign = campaignManager.createCampaign(campaign);
-        log.info("Create campaign response. id={}, imageUrl={}", savedCampaign.getId(), savedCampaign.getImageUrl());
+        log.info("Create campaign response. id={}, ngoName={}, imageUrl={}",
+            savedCampaign.getId(), savedCampaign.getNgoName(), savedCampaign.getImageUrl());
         return savedCampaign;
     }
 
