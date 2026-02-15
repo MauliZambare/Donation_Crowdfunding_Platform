@@ -32,8 +32,10 @@ const Home = () => {
     }
   };
 
-  const handleDonate = () => {
-    navigate("/payment");
+  const handleDonate = (campaignId, campaignTitle) => {
+    navigate("/payment", {
+      state: { campaignId, campaignTitle },
+    });
   };
 
   const handleCommentSubmit = (campaignId) => {
@@ -205,7 +207,7 @@ const Home = () => {
 
               {loggedInUser?.userType?.toLowerCase() === "donor" && (
                 <div className="donate-section">
-                  <button className="donate-btn" onClick={handleDonate}>
+                  <button className="donate-btn" onClick={() => handleDonate(campaign.id, campaign.title)}>
                     <i className="icon-heart"></i>
                     Donate Now
                   </button>
