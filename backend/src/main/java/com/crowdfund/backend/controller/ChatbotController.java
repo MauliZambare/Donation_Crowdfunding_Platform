@@ -2,8 +2,9 @@ package com.crowdfund.backend.controller;
 
 import java.util.List;
 
+import jakarta.validation.Valid;
+
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,7 +17,6 @@ import com.crowdfund.backend.model.ChatMessage;
 import com.crowdfund.backend.service.ChatbotService;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("/api/chatbot")
 public class ChatbotController {
 
@@ -26,8 +26,8 @@ public class ChatbotController {
         this.chatbotService = chatbotService;
     }
 
-    @PostMapping("/message")
-    public ResponseEntity<ChatbotResponse> sendMessage(@RequestBody ChatbotRequest request) {
+    @PostMapping({"", "/message"})
+    public ResponseEntity<ChatbotResponse> sendMessage(@Valid @RequestBody ChatbotRequest request) {
         ChatbotResponse response = chatbotService.processMessage(request);
         return ResponseEntity.ok(response);
     }

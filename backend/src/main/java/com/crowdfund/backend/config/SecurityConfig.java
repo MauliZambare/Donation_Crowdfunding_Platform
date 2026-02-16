@@ -21,6 +21,8 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/api/users/register",
                     "/api/users/login",
+                    "/api/chatbot",
+                    "/api/chatbot/**",
                     "/api/campaigns/**",
                     "/api/images/upload",
                     "/api/receipt/**"

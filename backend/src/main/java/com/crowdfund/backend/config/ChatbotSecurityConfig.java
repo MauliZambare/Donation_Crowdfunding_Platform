@@ -14,7 +14,7 @@ public class ChatbotSecurityConfig {
     @Order(0)
     public SecurityFilterChain chatbotSecurityFilterChain(HttpSecurity http, CorsConfigurationSource corsConfigurationSource) throws Exception {
         http
-            .securityMatcher("/api/chatbot/**")
+            .securityMatcher("/api/chatbot", "/api/chatbot/**")
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource))
             .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());

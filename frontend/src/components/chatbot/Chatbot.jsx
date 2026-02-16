@@ -53,7 +53,7 @@ const Chatbot = () => {
       setIsHistoryLoaded(true);
       setLoadError("");
     } catch (error) {
-      setLoadError("Could not load previous chat.");
+      setLoadError(error.message || "Could not load previous chat.");
       setIsHistoryLoaded(true);
     }
   };
@@ -89,7 +89,7 @@ const Chatbot = () => {
       const errorMessage = {
         id: `error-${Date.now()}`,
         sender: "bot",
-        text: "Something went wrong while contacting the chatbot service.",
+        text: error.message || "Something went wrong while contacting the chatbot service.",
         timestamp: new Date().toISOString(),
       };
       setMessages((prev) => [...prev, errorMessage]);

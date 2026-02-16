@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Link, Navigate, Route, Routes, useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import Home from "./components/Dashboard/Home";
 import Ngo from "./components/Dashboard/Ngo";
 import Payment from "./components/Donation/Payment";
@@ -10,11 +10,18 @@ import Chatbot from "./components/chatbot/Chatbot";
 const App = () => {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
   // ✅ On app load, check localStorage
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("user"));
-    if (storedUser) setUser(storedUser);
+    try {
+      const storedUser = JSON.parse(localStorage.getItem("user"));
+      if (storedUser) {
+        setUser(storedUser);
+      }
+    } catch (error) {
+      localStorage.removeItem("user");
+    }
   }, []);
 
   // ✅ Logout handler
@@ -22,8 +29,13 @@ const App = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     setUser(null);
-    navigate("/login", { replace: true }); // replace to prevent back button loop
+    navigate("/login", { replace: true });
   };
+
+  const shouldShowChatbot = useMemo(() => {
+    const hiddenRoutes = ["/", "/login", "/register"];
+    return Boolean(user) && !hiddenRoutes.includes(location.pathname.toLowerCase());
+  }, [location.pathname, user]);
 
   return (
     <>
@@ -76,7 +88,7 @@ const App = () => {
         />
       </Routes>
 
-      <Chatbot />
+      {shouldShowChatbot && <Chatbot />}
     </>
   );
 };

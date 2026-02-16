@@ -6,6 +6,8 @@ import java.util.Map;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -16,6 +18,14 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    @ExceptionHandler(ChatbotServiceException.class)
+    public ResponseEntity<Map<String, Object>> handleChatbotServiceException(ChatbotServiceException ex, HttpServletRequest request) {
+        log.error("Chatbot service error on {}: {}", request.getRequestURI(), ex.getMessage(), ex);
+        return buildResponse(HttpStatus.SERVICE_UNAVAILABLE, ex.getMessage(), request.getRequestURI());
+    }
 
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<Map<String, Object>> handleBadRequest(BadRequestException ex, HttpServletRequest request) {

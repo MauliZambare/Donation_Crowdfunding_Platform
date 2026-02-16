@@ -1,7 +1,10 @@
 package com.crowdfund.backend.dto;
 
+import jakarta.validation.constraints.NotBlank;
+
 public class ChatbotRequest {
 
+    @NotBlank(message = "message is required")
     private String message;
 
     public ChatbotRequest() {
