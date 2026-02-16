@@ -3,6 +3,7 @@ package com.crowdfund.backend.service;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,9 +33,16 @@ public class ImageUploadService {
         validateFile(file);
 
         try {
+            String publicId = "campaign_" + UUID.randomUUID();
             Map<?, ?> uploadResult = cloudinary.uploader().upload(
                 file.getBytes(),
-                ObjectUtils.asMap("resource_type", "image")
+                ObjectUtils.asMap(
+                    "resource_type", "image",
+                    "folder", "donation_campaigns",
+                    "public_id", publicId,
+                    "overwrite", false,
+                    "invalidate", true
+                )
             );
 
             Object secureUrl = uploadResult.get("secure_url");

@@ -20,9 +20,10 @@ export const uploadImage = (file) => {
   const formData = new FormData();
   formData.append("file", file);
 
-  return api.post("/images/upload", formData, {
+  // Use raw axios so browser sets multipart boundary automatically.
+  return axios.post(`${API_BASE_URL}/api/images/upload`, formData, {
     headers: {
-      "Content-Type": "multipart/form-data",
+      Accept: "application/json",
     },
   });
 };
