@@ -5,6 +5,7 @@ import Ngo from "./components/Dashboard/Ngo";
 import Payment from "./components/Donation/Payment";
 import Login from "./components/Login/Login";
 import Register from "./components/Register/Register";
+import Chatbot from "./components/chatbot/Chatbot";
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -74,6 +75,8 @@ const App = () => {
           element={user?.userType?.toLowerCase() === 'ngo' ? <Ngo /> : <Navigate to="/login" replace />}
         />
       </Routes>
+
+      <Chatbot />
     </>
   );
 };
