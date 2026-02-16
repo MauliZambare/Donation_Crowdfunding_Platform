@@ -15,6 +15,7 @@ export const loginUser = (loginData) => api.post("/users/login", loginData);
 export const getCampaigns = () => api.get("/campaigns");
 export const createCampaign = (campaignData) => api.post("/campaigns", campaignData);
 export const deleteCampaign = (campaignId) => api.delete(`/campaigns/${campaignId}`);
+export const getSocialPostCaptions = (campaignId) => api.get(`/social/posts/${campaignId}`);
 
 export const uploadImage = (file) => {
   const formData = new FormData();

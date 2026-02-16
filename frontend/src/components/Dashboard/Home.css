@@ -192,6 +192,80 @@
   margin-right: 4px;
 }
 
+.share-section {
+  padding: 14px 16px 16px;
+  border-bottom: 1px solid #efefef;
+  background: linear-gradient(180deg, #ffffff 0%, #fafbff 100%);
+}
+
+.share-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.share-section-header h4 {
+  margin: 0;
+  font-size: 14px;
+  color: #3b3f55;
+  font-weight: 600;
+}
+
+.share-loading {
+  font-size: 12px;
+  color: #667eea;
+}
+
+.share-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.share-btn {
+  border: 1px solid #e3e7ef;
+  border-radius: 18px;
+  background: #fff;
+  color: #2f3542;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.share-btn:hover {
+  transform: translateY(-1px);
+  border-color: transparent;
+}
+
+.share-btn.instagram:hover {
+  color: #fff;
+  background: linear-gradient(135deg, #f58529, #dd2a7b, #8134af);
+}
+
+.share-btn.twitter:hover {
+  color: #fff;
+  background: #111827;
+}
+
+.share-btn.whatsapp:hover {
+  color: #fff;
+  background: #25d366;
+}
+
+.share-btn.copy:hover {
+  color: #fff;
+  background: #667eea;
+}
+
+.share-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .post-details {
   padding: 16px;
   border-bottom: 1px solid #efefef;
@@ -424,5 +498,16 @@
   
   .campaigns-header {
     padding: 0 16px;
+  }
+
+  .share-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .share-btn {
+    width: 100%;
+    text-align: center;
   }
 }

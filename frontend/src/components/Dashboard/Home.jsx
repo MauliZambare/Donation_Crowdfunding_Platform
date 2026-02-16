@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getCampaigns } from "../../services/api";
+import { toast } from "react-toastify";
+import { getCampaigns, getSocialPostCaptions } from "../../services/api";
 import "./Home.css";
 
 const FALLBACK_IMAGE_URL =
@@ -11,6 +12,8 @@ const Home = () => {
   const [comments, setComments] = useState({});
   const [newComment, setNewComment] = useState("");
   const [selectedImage, setSelectedImage] = useState(null);
+  const [socialCaptions, setSocialCaptions] = useState({});
+  const [shareLoading, setShareLoading] = useState({});
   const loggedInUser = JSON.parse(localStorage.getItem("user"));
   const navigate = useNavigate();
 
@@ -62,6 +65,101 @@ const Home = () => {
 
   const closeImageModal = () => {
     setSelectedImage(null);
+  };
+
+  const ensureSocialCaptions = async (campaignId) => {
+    if (socialCaptions[campaignId]) {
+      return socialCaptions[campaignId];
+    }
+
+    setShareLoading((prev) => ({ ...prev, [campaignId]: true }));
+    try {
+      const response = await getSocialPostCaptions(campaignId);
+      const captions = response?.data;
+      if (!captions || (!captions.instagram && !captions.twitter && !captions.whatsapp)) {
+        throw new Error("Invalid caption payload");
+      }
+      setSocialCaptions((prev) => ({ ...prev, [campaignId]: captions }));
+      return captions;
+    } catch (error) {
+      console.error("Failed to fetch social captions:", error);
+      toast.error("Unable to generate share caption right now.");
+      return null;
+    } finally {
+      setShareLoading((prev) => ({ ...prev, [campaignId]: false }));
+    }
+  };
+
+  const copyToClipboard = async (text) => {
+    if (!text) return false;
+
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
+    } catch (error) {
+      console.error("Clipboard API failed:", error);
+    }
+
+    try {
+      const input = document.createElement("textarea");
+      input.value = text;
+      input.setAttribute("readonly", "");
+      input.style.position = "absolute";
+      input.style.left = "-9999px";
+      document.body.appendChild(input);
+      input.select();
+      const copied = document.execCommand("copy");
+      document.body.removeChild(input);
+      return copied;
+    } catch (error) {
+      console.error("Fallback clipboard copy failed:", error);
+      return false;
+    }
+  };
+
+  const handleInstagramShare = async (campaignId) => {
+    const captions = await ensureSocialCaptions(campaignId);
+    if (!captions?.instagram) return;
+
+    const copied = await copyToClipboard(captions.instagram);
+    if (copied) {
+      toast.info("Caption copied, paste in Instagram.");
+    } else {
+      toast.error("Could not copy caption to clipboard.");
+    }
+
+    window.open("https://www.instagram.com/", "_blank", "noopener,noreferrer");
+  };
+
+  const handleTwitterShare = async (campaignId) => {
+    const captions = await ensureSocialCaptions(campaignId);
+    if (!captions?.twitter) return;
+
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(captions.twitter)}`;
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
+  const handleWhatsAppShare = async (campaignId) => {
+    const captions = await ensureSocialCaptions(campaignId);
+    if (!captions?.whatsapp) return;
+
+    const url = `https://wa.me/?text=${encodeURIComponent(captions.whatsapp)}`;
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
+  const handleCopyCaption = async (campaignId) => {
+    const captions = await ensureSocialCaptions(campaignId);
+    const caption = captions?.instagram || captions?.twitter || captions?.whatsapp;
+    if (!caption) return;
+
+    const copied = await copyToClipboard(caption);
+    if (copied) {
+      toast.success("Caption copied to clipboard.");
+    } else {
+      toast.error("Could not copy caption to clipboard.");
+    }
   };
 
   return (
@@ -144,6 +242,43 @@ const Home = () => {
                 <p>
                   <strong>{ngoName}</strong> {campaign.title}
                 </p>
+              </div>
+
+              <div className="share-section">
+                <div className="share-section-header">
+                  <h4>Share Post</h4>
+                  {shareLoading[campaign.id] && <span className="share-loading">Generating caption...</span>}
+                </div>
+                <div className="share-buttons">
+                  <button
+                    className="share-btn instagram"
+                    onClick={() => handleInstagramShare(campaign.id)}
+                    disabled={!!shareLoading[campaign.id]}
+                  >
+                    Instagram
+                  </button>
+                  <button
+                    className="share-btn twitter"
+                    onClick={() => handleTwitterShare(campaign.id)}
+                    disabled={!!shareLoading[campaign.id]}
+                  >
+                    Twitter (X)
+                  </button>
+                  <button
+                    className="share-btn whatsapp"
+                    onClick={() => handleWhatsAppShare(campaign.id)}
+                    disabled={!!shareLoading[campaign.id]}
+                  >
+                    WhatsApp
+                  </button>
+                  <button
+                    className="share-btn copy"
+                    onClick={() => handleCopyCaption(campaign.id)}
+                    disabled={!!shareLoading[campaign.id]}
+                  >
+                    Copy Caption
+                  </button>
+                </div>
               </div>
 
               <div className="post-details">
