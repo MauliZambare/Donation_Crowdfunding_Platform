@@ -11,6 +11,7 @@ const Register = () => {
     email: '',
     password: '',
     confirmPassword: '',
+    phoneNumber: '',
     userType: 'donor',
     bankAccount: '',
     bankIFSC: ''
@@ -35,9 +36,12 @@ const Register = () => {
     try {
       const apiData = { ...formData };
       delete apiData.confirmPassword;
+      if (!apiData.phoneNumber) {
+        delete apiData.phoneNumber;
+      }
 
       const response = await registerUser(apiData);
-      const user = response.data;
+      const user = response.data?.data || response.data;
 
       localStorage.setItem('user', JSON.stringify(user));
       toast.success('Registration successful!');
@@ -100,6 +104,18 @@ const Register = () => {
                   <i className="icon-email"></i>
                 </div>
               </div>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="phoneNumber" className="form-label">Phone Number (Optional)</label>
+              <input
+                type="tel"
+                id="phoneNumber"
+                name="phoneNumber"
+                placeholder="+14155552671"
+                value={formData.phoneNumber}
+                onChange={handleChange}
+              />
             </div>
 
             <div className="form-row">

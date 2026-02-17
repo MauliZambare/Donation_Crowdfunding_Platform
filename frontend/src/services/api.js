@@ -9,8 +9,18 @@ export const api = axios.create({
   },
 });
 
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 export const registerUser = (userData) => api.post("/users/register", userData);
 export const loginUser = (loginData) => api.post("/users/login", loginData);
+export const sendOtp = (payload) => api.post("/auth/send-otp", payload);
+export const verifyOtp = (payload) => api.post("/auth/verify-otp", payload);
 
 export const getCampaigns = () => api.get("/campaigns");
 export const createCampaign = (campaignData) => api.post("/campaigns", campaignData);
