@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { uploadImage } from "../../services/api";
-import "./ImageUpload.css";
 
 const ImageUpload = ({ imageUrl, onUploadSuccess }) => {
   const fileInputRef = useRef(null);
@@ -11,7 +10,6 @@ const ImageUpload = ({ imageUrl, onUploadSuccess }) => {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    // Sync with parent when uploaded URL changes.
     if (imageUrl) {
       setPreviewUrl(addCacheBust(imageUrl));
     } else if (!selectedFile) {
@@ -73,31 +71,31 @@ const ImageUpload = ({ imageUrl, onUploadSuccess }) => {
   };
 
   return (
-    <div className="image-upload">
+    <div className="space-y-3 rounded-xl border border-white/20 bg-white/5 p-3">
       <input
         ref={fileInputRef}
         type="file"
         accept="image/jpeg,image/png"
         onChange={handleFileChange}
-        className="image-upload-input"
+        className="focus-ring w-full rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-sm text-slate-100 file:mr-3 file:rounded-lg file:border-0 file:bg-cyan-500/20 file:px-3 file:py-1.5 file:text-cyan-200"
       />
 
       {previewUrl && (
-        <div className="image-upload-preview">
-          <img src={previewUrl} alt="Campaign preview" />
+        <div className="h-44 overflow-hidden rounded-xl border border-white/15 bg-black/20">
+          <img src={previewUrl} alt="Campaign preview" className="h-full w-full object-cover" loading="lazy" />
         </div>
       )}
 
       <button
         type="button"
         onClick={handleUpload}
-        className="image-upload-button"
+        className="rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-cyan-500/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
         disabled={isUploading}
       >
         {isUploading ? "Uploading..." : "Upload Image"}
       </button>
 
-      {error && <p className="image-upload-error">{error}</p>}
+      {error && <p className="text-sm text-rose-300">{error}</p>}
     </div>
   );
 };

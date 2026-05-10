@@ -1,14 +1,15 @@
-import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import Swal from 'sweetalert2';
-import { loginUser, sendOtp, verifyOtp } from '../../services/api';
-import './Login.css';
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { motion as Motion } from "framer-motion";
+import { toast } from "react-toastify";
+import Swal from "sweetalert2";
+import { loginUser, sendOtp, verifyOtp } from "../../services/api";
+import { extractErrorMessage } from "../../utils/errorHandler";
 
 const Login = ({ setUser }) => {
-  const [loginMode, setLoginMode] = useState('password');
-  const [passwordForm, setPasswordForm] = useState({ email: '', password: '' });
-  const [otpForm, setOtpForm] = useState({ phoneNumber: '', otp: '' });
+  const [loginMode, setLoginMode] = useState("password");
+  const [passwordForm, setPasswordForm] = useState({ email: "", password: "" });
+  const [otpForm, setOtpForm] = useState({ phoneNumber: "", otp: "" });
   const [otpSent, setOtpSent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSendingOtp, setIsSendingOtp] = useState(false);
@@ -16,123 +17,74 @@ const Login = ({ setUser }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const user = JSON.parse(localStorage.getItem('user'));
+    const token = localStorage.getItem("token");
+    const user = JSON.parse(localStorage.getItem("user") || "null");
     if (token && user) {
-      const path =
-        user.userType?.toLowerCase() === 'ngo'
-          ? '/Dashboard/Ngo'
-          : '/Dashboard/Home';
-      if (typeof setUser === 'function') setUser(user);
-      navigate(path, { replace: true });
+      if (typeof setUser === "function") setUser(user);
+      navigate(user.userType?.toLowerCase() === "ngo" ? "/Dashboard/Ngo" : "/Dashboard/Home", { replace: true });
     }
   }, [navigate, setUser]);
 
   useEffect(() => {
     if (cooldown <= 0) return undefined;
-    const timer = setInterval(() => {
-      setCooldown((prev) => (prev > 0 ? prev - 1 : 0));
-    }, 1000);
+    const timer = setInterval(() => setCooldown((prev) => (prev > 0 ? prev - 1 : 0)), 1000);
     return () => clearInterval(timer);
   }, [cooldown]);
 
-  const extractAuthData = (responseData) => {
+  const completeLogin = (responseData, successMessage) => {
     const payload = responseData?.data ?? responseData;
     const token = payload?.token;
     const user = payload?.user;
-    return { token, user };
-  };
 
-  const completeLogin = (responseData, successMessage) => {
-    const { token, user } = extractAuthData(responseData);
     if (!token || !user) {
-      throw new Error('Invalid authentication response');
+      throw new Error("Invalid authentication response");
     }
 
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(user));
-    if (typeof setUser === 'function') setUser(user);
+    localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(user));
+    if (typeof setUser === "function") setUser(user);
 
     toast.success(successMessage);
-    const path =
-      user.userType?.toLowerCase() === 'ngo'
-        ? '/Dashboard/Ngo'
-        : '/Dashboard/Home';
-    navigate(path, { replace: true });
+    navigate(user.userType?.toLowerCase() === "ngo" ? "/Dashboard/Ngo" : "/Dashboard/Home", { replace: true });
   };
 
-  const handlePasswordChange = (e) => {
-    setPasswordForm({ ...passwordForm, [e.target.name]: e.target.value });
-  };
-
-  const handleOtpChange = (e) => {
-    setOtpForm({ ...otpForm, [e.target.name]: e.target.value });
-  };
-
-  const handlePasswordSubmit = async (e) => {
-    e.preventDefault();
+  const handlePasswordSubmit = async (event) => {
+    event.preventDefault();
     setIsLoading(true);
-
     try {
       const response = await loginUser(passwordForm);
-      completeLogin(response.data, 'Login successful!');
+      completeLogin(response.data, "Login successful");
     } catch (error) {
-      if (error.response?.status === 401) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Login Failed',
-          text: 'Invalid email or password',
-        });
-      } else {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: error.response?.data?.message || 'Something went wrong. Try again.',
-        });
-      }
+      Swal.fire({ icon: "error", title: "Login Failed", text: extractErrorMessage(error, "Invalid email or password") });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleSendOtp = async (e) => {
-    e.preventDefault();
+  const handleSendOtp = async (event) => {
+    event.preventDefault();
     setIsSendingOtp(true);
-
     try {
       const response = await sendOtp({ phoneNumber: otpForm.phoneNumber });
-      const resendAvailableInSeconds =
-        response?.data?.data?.resendAvailableInSeconds ?? 30;
-      setCooldown(resendAvailableInSeconds);
+      const waitSeconds = response?.data?.data?.resendAvailableInSeconds ?? 30;
+      setCooldown(waitSeconds);
       setOtpSent(true);
-      toast.success(response?.data?.message || 'OTP sent successfully');
+      toast.success(response?.data?.message || "OTP sent successfully");
     } catch (error) {
-      Swal.fire({
-        icon: 'error',
-        title: 'OTP Send Failed',
-        text: error.response?.data?.message || 'Unable to send OTP right now.',
-      });
+      Swal.fire({ icon: "error", title: "OTP Send Failed", text: extractErrorMessage(error, "Unable to send OTP") });
     } finally {
       setIsSendingOtp(false);
     }
   };
 
-  const handleVerifyOtp = async (e) => {
-    e.preventDefault();
+  const handleVerifyOtp = async (event) => {
+    event.preventDefault();
     setIsLoading(true);
-
     try {
-      const response = await verifyOtp({
-        phoneNumber: otpForm.phoneNumber,
-        otp: otpForm.otp,
-      });
-      completeLogin(response.data, 'OTP verified. Login successful!');
+      const response = await verifyOtp({ phoneNumber: otpForm.phoneNumber, otp: otpForm.otp });
+      completeLogin(response.data, "OTP verified and login successful");
     } catch (error) {
-      Swal.fire({
-        icon: 'error',
-        title: 'OTP Verification Failed',
-        text: error.response?.data?.message || 'Invalid OTP or it has expired.',
-      });
+      Swal.fire({ icon: "error", title: "OTP Verification Failed", text: extractErrorMessage(error, "Invalid OTP") });
     } finally {
       setIsLoading(false);
     }
@@ -141,119 +93,148 @@ const Login = ({ setUser }) => {
   const switchMode = (mode) => {
     setLoginMode(mode);
     setOtpSent(false);
-    setOtpForm({ phoneNumber: '', otp: '' });
+    setOtpForm({ phoneNumber: "", otp: "" });
     setCooldown(0);
   };
 
   return (
-    <div className="auth-wrapper">
-      <div className="auth-left">
-        <h1>DonateHope</h1>
-        <h3>Donation & Crowdfunding Platform</h3>
-        <p>Empowering causes. Supporting NGOs. Changing lives.</p>
-      </div>
+    <div className="grid min-h-[calc(100vh-9rem)] items-center gap-8 lg:grid-cols-[1fr_1fr]">
+      <Motion.section
+        className="glass-card p-6 sm:p-8"
+        initial={{ opacity: 0, x: -24 }}
+        animate={{ opacity: 1, x: 0 }}
+      >
+        <p className="mb-3 text-xs uppercase tracking-[0.23em] text-cyan-300">Welcome Back</p>
+        <h1 className="text-4xl font-bold text-slate-100">Premium Giving Experience</h1>
+        <p className="mt-3 text-sm text-slate-300">Secure auth, transparent campaigns, and AI assistance for every donation decision.</p>
 
-      <div className="auth-right">
-        <h2>Sign in</h2>
-        <p className="sub-text">Choose your preferred login method</p>
+        <div className="mt-6 space-y-3">
+          <Feature iconClass="bi bi-shield-check" text="Secure JWT + OTP Authentication" />
+          <Feature iconClass="bi bi-stars" text="AI-powered donor recommendations" />
+          <Feature iconClass="bi bi-graph-up-arrow" text="Real-time impact analytics" />
+        </div>
+      </Motion.section>
 
-        <div className="login-mode-toggle">
+      <Motion.section
+        className="glass-card p-6 sm:p-8"
+        initial={{ opacity: 0, x: 24 }}
+        animate={{ opacity: 1, x: 0 }}
+      >
+        <h2 className="text-2xl font-semibold text-slate-100">Sign in to continue</h2>
+        <p className="mt-1 text-sm text-slate-300">Choose password or OTP-based authentication</p>
+
+        <div className="mt-4 grid grid-cols-2 gap-2 rounded-xl bg-white/5 p-1">
           <button
             type="button"
-            className={`mode-btn ${loginMode === 'password' ? 'active' : ''}`}
-            onClick={() => switchMode('password')}
+            className={`rounded-lg px-3 py-2 text-sm font-medium ${loginMode === "password" ? "bg-cyan-500 text-slate-900" : "text-slate-200 hover:bg-white/10"}`}
+            onClick={() => switchMode("password")}
           >
-            Login with Password
+            Password
           </button>
           <button
             type="button"
-            className={`mode-btn ${loginMode === 'otp' ? 'active' : ''}`}
-            onClick={() => switchMode('otp')}
+            className={`rounded-lg px-3 py-2 text-sm font-medium ${loginMode === "otp" ? "bg-cyan-500 text-slate-900" : "text-slate-200 hover:bg-white/10"}`}
+            onClick={() => switchMode("otp")}
           >
-            Login with OTP
+            OTP
           </button>
         </div>
 
-        {loginMode === 'password' && (
-          <form onSubmit={handlePasswordSubmit}>
-            <input
+        {loginMode === "password" ? (
+          <form className="mt-5 space-y-4" onSubmit={handlePasswordSubmit}>
+            <InputField
+              label="Email"
               type="email"
-              placeholder="Email"
-              name="email"
               value={passwordForm.email}
-              onChange={handlePasswordChange}
+              onChange={(value) => setPasswordForm((prev) => ({ ...prev, email: value }))}
               required
             />
-
-            <input
+            <InputField
+              label="Password"
               type="password"
-              placeholder="Password"
-              name="password"
               value={passwordForm.password}
-              onChange={handlePasswordChange}
+              onChange={(value) => setPasswordForm((prev) => ({ ...prev, password: value }))}
               required
             />
-
-            <button type="submit" className="login-main-btn" disabled={isLoading}>
-              {isLoading ? 'Logging in...' : 'Login'}
+            <button
+              type="submit"
+              className="w-full rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-cyan-500/30"
+              disabled={isLoading}
+            >
+              {isLoading ? "Logging in..." : "Login"}
             </button>
           </form>
-        )}
-
-        {loginMode === 'otp' && (
-          <form onSubmit={otpSent ? handleVerifyOtp : handleSendOtp}>
-            <input
+        ) : (
+          <form className="mt-5 space-y-4" onSubmit={otpSent ? handleVerifyOtp : handleSendOtp}>
+            <InputField
+              label="Phone Number"
               type="tel"
-              placeholder="Phone Number (e.g. +14155552671)"
-              name="phoneNumber"
               value={otpForm.phoneNumber}
-              onChange={handleOtpChange}
-              required
+              onChange={(value) => setOtpForm((prev) => ({ ...prev, phoneNumber: value }))}
+              placeholder="+919876543210"
               disabled={otpSent}
+              required
             />
-
             {otpSent && (
-              <input
+              <InputField
+                label="OTP"
                 type="text"
-                placeholder="Enter 6-digit OTP"
-                name="otp"
                 value={otpForm.otp}
-                onChange={handleOtpChange}
-                pattern="\d{6}"
-                maxLength={6}
+                onChange={(value) => setOtpForm((prev) => ({ ...prev, otp: value }))}
+                placeholder="Enter 6-digit OTP"
                 required
               />
             )}
-
             {!otpSent ? (
-              <button type="submit" className="login-main-btn" disabled={isSendingOtp}>
-                {isSendingOtp ? 'Sending OTP...' : 'Send OTP'}
+              <button type="submit" className="w-full rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 px-4 py-2.5 text-sm font-semibold text-white" disabled={isSendingOtp}>
+                {isSendingOtp ? "Sending OTP..." : "Send OTP"}
               </button>
             ) : (
-              <>
-                <button type="submit" className="login-main-btn" disabled={isLoading}>
-                  {isLoading ? 'Verifying...' : 'Verify OTP'}
+              <div className="space-y-2">
+                <button type="submit" className="w-full rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 px-4 py-2.5 text-sm font-semibold text-white" disabled={isLoading}>
+                  {isLoading ? "Verifying..." : "Verify OTP"}
                 </button>
                 <button
                   type="button"
-                  className="resend-btn"
+                  className="w-full rounded-xl bg-white/10 px-4 py-2.5 text-sm text-slate-200"
                   onClick={handleSendOtp}
                   disabled={isSendingOtp || cooldown > 0}
                 >
-                  {cooldown > 0 ? `Resend OTP in ${cooldown}s` : 'Resend OTP'}
+                  {cooldown > 0 ? `Resend OTP in ${cooldown}s` : "Resend OTP"}
                 </button>
-              </>
+              </div>
             )}
           </form>
         )}
 
-        <div className="auth-links">
-          <Link to="/forgot-password">Forgot Password</Link>
-          <Link to="/register">Sign Up</Link>
-        </div>
-      </div>
+        <p className="mt-5 text-sm text-slate-300">
+          New to the platform? <Link to="/register" className="font-semibold text-cyan-200 hover:text-cyan-100">Create an account</Link>
+        </p>
+      </Motion.section>
     </div>
   );
 };
+
+const Feature = ({ iconClass, text }) => (
+  <div className="flex items-center gap-3 rounded-xl bg-white/5 px-3 py-2 text-sm text-slate-200">
+    <i className={`${iconClass} text-cyan-200`} aria-hidden="true" />
+    <span>{text}</span>
+  </div>
+);
+
+const InputField = ({ label, value, onChange, type, placeholder, required, disabled }) => (
+  <label className="space-y-2 text-sm">
+    <span className="font-medium text-slate-200">{label}</span>
+    <input
+      type={type}
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+      placeholder={placeholder}
+      required={required}
+      disabled={disabled}
+      className="focus-ring w-full rounded-xl border border-white/20 bg-black/20 px-3 py-2 text-slate-100 placeholder:text-slate-400 disabled:opacity-60"
+    />
+  </label>
+);
 
 export default Login;
