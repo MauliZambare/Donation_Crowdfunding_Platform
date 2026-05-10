@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { getCampaigns, getSocialPostCaptions } from "../../services/api";
@@ -14,18 +14,10 @@ const Home = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [socialCaptions, setSocialCaptions] = useState({});
   const [shareLoading, setShareLoading] = useState({});
-  const loggedInUser = JSON.parse(localStorage.getItem("user"));
+  const loggedInUser = useMemo(() => JSON.parse(localStorage.getItem("user")), []);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!loggedInUser) {
-      window.location.href = "/login";
-    } else {
-      fetchCampaigns();
-    }
-  }, []);
-
-  const fetchCampaigns = async () => {
+  const fetchCampaigns = useCallback(async () => {
     try {
       const res = await getCampaigns();
       console.log("Campaign API response:", res.data);
@@ -33,7 +25,15 @@ const Home = () => {
     } catch (err) {
       console.error("Error fetching campaigns:", err);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (!loggedInUser) {
+      window.location.href = "/login";
+    } else {
+      fetchCampaigns();
+    }
+  }, [fetchCampaigns, loggedInUser]);
 
   const handleDonate = (campaignId, campaignTitle) => {
     navigate("/payment", {

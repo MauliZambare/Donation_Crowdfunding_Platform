@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { api } from "../../services/api";
 import "./payment.css";
 
-const RAZORPAY_KEY_ID = sanitizeRazorpayKey(import.meta.env.VITE_RAZORPAY_KEY_ID) || "rzp_test_SGSGChkzIpBp8i";
+const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID;
 
 const Payment = ({ campaignId, campaignTitle, userId, user }) => {
   const [amount, setAmount] = useState("");
@@ -263,14 +263,7 @@ const Payment = ({ campaignId, campaignTitle, userId, user }) => {
 
 export default Payment;
 
-function sanitizeRazorpayKey(value) {
-  if (!value) return "";
-  const trimmed = String(value).trim();
-  if (trimmed.length >= 2 && ((trimmed.startsWith('"') && trimmed.endsWith('"')) || (trimmed.startsWith("'") && trimmed.endsWith("'")))) {
-    return trimmed.slice(1, -1).trim();
-  }
-  return trimmed;
-}
+
 
 function extractErrorMessage(error, fallback) {
   const backendMessage = error?.response?.data?.message;

@@ -19,7 +19,7 @@ const App = () => {
       if (storedUser) {
         setUser(storedUser);
       }
-    } catch (error) {
+    } catch {
       localStorage.removeItem("user");
     }
   }, []);

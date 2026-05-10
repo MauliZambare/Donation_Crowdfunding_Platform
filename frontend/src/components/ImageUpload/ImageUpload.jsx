@@ -17,7 +17,7 @@ const ImageUpload = ({ imageUrl, onUploadSuccess }) => {
     } else if (!selectedFile) {
       setPreviewUrl("");
     }
-  }, [imageUrl]);
+  }, [imageUrl, selectedFile]);
 
   useEffect(() => {
     return () => {

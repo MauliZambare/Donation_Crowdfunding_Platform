@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import ImageUpload from "../ImageUpload/ImageUpload";
+import useAuth from "../../hooks/useAuth";
 import { createCampaign, deleteCampaign, getCampaigns } from "../../services/api";
 import "./Ngo.css";
 
@@ -9,6 +10,7 @@ const FALLBACK_IMAGE_URL = "https://images.unsplash.com/photo-1576091160550-2173
 const Ngo = () => {
   const [campaigns, setCampaigns] = useState([]);
   const [showForm, setShowForm] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -18,27 +20,29 @@ const Ngo = () => {
   });
   const [comments, setComments] = useState({});
   const [newComment, setNewComment] = useState("");
-  const loggedInUser = JSON.parse(localStorage.getItem("user"));
+  const { user: loggedInUser, requireAuth } = useAuth();
+  const creatorId = loggedInUser?.id;
 
-  useEffect(() => {
-    if (!loggedInUser || loggedInUser.userType?.toLowerCase() !== "ngo") {
-      window.location.href = "/login";
-    } else {
-      fetchMyCampaigns();
-    }
-  }, []);
-
-  const fetchMyCampaigns = async () => {
+  const fetchMyCampaigns = useCallback(async () => {
+    if (!creatorId) return;
+    setIsLoading(true);
     try {
       const res = await getCampaigns();
-      console.log("NGO campaigns API response:", res.data);
-      const myCampaigns = res.data.filter((campaign) => campaign.creatorId === loggedInUser.id);
-      myCampaigns.forEach((campaign) => console.log("NGO campaign item:", campaign));
+      const myCampaigns = res.data.filter((campaign) => campaign.creatorId === creatorId);
       setCampaigns(myCampaigns);
     } catch (err) {
       Swal.fire("Error", "Failed to fetch campaigns: " + (err.response?.data?.message || err.message), "error");
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }, [creatorId]);
+
+  useEffect(() => {
+    if (!requireAuth("ngo")) {
+      return;
+    }
+    fetchMyCampaigns();
+  }, [fetchMyCampaigns, requireAuth]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -46,6 +50,7 @@ const Ngo = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
     try {
       const payload = {
         title: formData.title,
@@ -56,9 +61,7 @@ const Ngo = () => {
         ngoName: loggedInUser.name,
         imageUrl: formData.imageUrl,
       };
-      console.log("Create campaign payload:", payload);
-      const response = await createCampaign(payload);
-      console.log("Create campaign response:", response.data);
+      await createCampaign(payload);
 
       Swal.fire("Success", "Campaign posted!", "success");
       setFormData({ title: "", description: "", targetAmount: "", deadline: "", imageUrl: "" });
@@ -66,6 +69,8 @@ const Ngo = () => {
       fetchMyCampaigns();
     } catch (err) {
       Swal.fire("Error", "Failed to post campaign: " + (err.response?.data?.message || err.message), "error");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -130,7 +135,7 @@ const Ngo = () => {
       <div className="create-campaign-section">
         <button className="create-campaign-btn" onClick={() => setShowForm(!showForm)}>
           <i className="icon-plus"></i>
-          {showForm ? "Cancel" : "Create New Campaign"}
+          {showForm ? "Cancel" : isLoading ? "Loading..." : "Create New Campaign"}
         </button>
 
         {showForm && (
@@ -194,9 +199,9 @@ const Ngo = () => {
                   />
                 </div>
 
-                <button type="submit" className="submit-btn">
+                <button type="submit" className="submit-btn" disabled={isLoading}>
                   <i className="icon-upload"></i>
-                  Publish Campaign
+                  {isLoading ? "Publishing..." : "Publish Campaign"}
                 </button>
               </form>
             </div>
